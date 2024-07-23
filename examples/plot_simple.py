@@ -1,0 +1,31 @@
+from pathlib import Path
+import numpy as np
+import matplotlib.pyplot as plt
+from timepix_sort.config import TDC2TriggerMode
+from timepix_sort.data_model import PixelEvent
+from timepix_sort.read import process_chunks, chunks, read
+
+data_dir = Path(__file__).parent.parent / "tests" /  "data"
+filename = data_dir / "Co_pos_0000.tpx3"
+
+events = [
+        ev for ev in process_chunks(chunks(read(filename)), trigger_mode=TDC2TriggerMode.rising_edge, tot_min=1)
+        if ev is not None
+    ]
+
+result = np.zeros([1024, 1024])
+for ev in events:
+    if isinstance(ev, PixelEvent):
+        x, y = ev.pos.x, ev.pos.y
+        assert x >= 0
+        assert y >= 0
+        x = int(round(x))
+        y = int(round(y))
+        result[x, y] += 1
+
+np.save("image_data.npy", result)
+
+plt.savefig("rough_data_result.png")
+plt.imshow(result[100:350,:400])
+plt.axis("equal")
+plt.savefig('data_plot.png')

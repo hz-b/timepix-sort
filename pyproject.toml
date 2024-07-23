@@ -1,5 +1,10 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm", "numpy"]
+requires = [
+    "setuptools",
+    "setuptools-scm",
+    "numpy",
+    # "fsspec"
+]
 build-backend = "setuptools.build_meta"
 
 
