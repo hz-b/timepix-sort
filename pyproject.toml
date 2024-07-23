@@ -1,8 +1,9 @@
 [build-system]
-requires = [ "poetry-core>=1.0.0",]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools", "setuptools-scm", "numpy"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry]
+
+[project]
 name = "timepix_sort"
 version = "0.0.0"
 description = "Sort pixels events"
@@ -10,12 +11,7 @@ authors = [
     {name="Pierre Schnizer", email="pierre.schnizer@helmholtz-berlin.de"},
     {name="Florian Kronast", email="florian.kronast@helmholtz-berlin.de"},
 ]
-license = "GPL-3.0"
-homepage = "https://github.com/hz-b/timepix_sort"
-documentation = "https://github.com/hz-b/timepix_sort"
-repository = "https://github.com/hz-b/timepix_sort.git"
-keywords = []
 
-[tool.poetry.dependencies]
-python = ">=3.7"
-numpy = "*"
+
+# [project.url]
+# homepage = "https://github.com/hz-b/timepix_sort"
