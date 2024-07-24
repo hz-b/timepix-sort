@@ -4,9 +4,9 @@ import numpy as np
 
 
 @dataclass
-class Event:
+class Chunk:
     chip_nr: int
-    event: Sequence[np.uint64]
+    payload: Sequence[np.uint64]
 
 
 @dataclass

@@ -5,7 +5,8 @@ import numpy as np
 
 from timepix_sort.config import TDC2TriggerMode
 from timepix_sort.data_model import PixelEvent
-from timepix_sort.read import chunks, process_chunks, read
+from timepix_sort.read import read, chunks
+from timepix_sort.process_chunks import process_chunks
 
 
 def test_package_content():
