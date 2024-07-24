@@ -16,7 +16,7 @@ class PixelPosition:
 
 
 @dataclass
-class TimeOfFlightEvent:
+class ReferenceEvent:
     time_of_arrival: float
     chip_nr: int
     id_: int

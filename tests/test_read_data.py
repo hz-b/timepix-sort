@@ -9,14 +9,10 @@ from timepix_sort.read import read, chunks
 from timepix_sort.process_chunks import process_chunks
 
 
-def test_package_content():
-
-    dir(timepix_sort)
-
 def test_data_read():
     data_dir = Path(__file__).parent / "data"
     filename = data_dir / "Co_pos_0000.tpx3"
-    # filename = data_dir / "Co_test_0000.tpx3"
+    filename = data_dir / "Co_test_0000.tpx3"
     stream = read(filename)
 
     t_chunks = [ch for ch in chunks(stream)]
@@ -38,3 +34,7 @@ def test_data_read():
             result[x, y] += 1
     np.save("image_data.npy", result)
     return
+
+
+if __name__ == "__main__":
+    test_data_read()

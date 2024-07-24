@@ -3,7 +3,7 @@ from typing import Sequence
 import numpy as np
 
 from timepix_sort.config import TDCEventType
-from timepix_sort.data_model import Chunk, TimeOfFlightEvent, PixelEvent, PixelPosition
+from timepix_sort.data_model import Chunk, ReferenceEvent, PixelEvent, PixelPosition
 
 
 def tdc_time_stamp(datum: int, index: int, chip_nr: int):
@@ -17,7 +17,7 @@ def tdc_time_stamp(datum: int, index: int, chip_nr: int):
     else:
         raise AssertionError("TDC timestamp unknown!")
     time_of_arrival = TDC_timestamp
-    return TimeOfFlightEvent(
+    return ReferenceEvent(
         time_of_arrival=time_of_arrival, chip_nr=chip_nr, id_=index
     )
 

@@ -9,7 +9,7 @@ from timepix_sort.process_chunks import process_chunks
 
 data_dir = Path(__file__).parent.parent / "tests" / "data"
 filename = data_dir / "Co_pos_0000.tpx3"
-# filename = data_dir / "Co_test_0000.tpx3"
+filename = data_dir / "Co_test_0000.tpx3"
 
 
 start = datetime.datetime.now()
@@ -35,6 +35,9 @@ for ev in events:
         result[x, y] += 1
 
 np.save("image_data.npy", result)
+del events
+
 plt.imshow(result[100:350, :400])
 plt.axis("equal")
 plt.savefig("rough_data_result.png")
+plt.show()
