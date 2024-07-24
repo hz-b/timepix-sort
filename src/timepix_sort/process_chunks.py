@@ -1,5 +1,4 @@
 from typing import Sequence
-
 import numpy as np
 
 from timepix_sort.config import TDCEventType
@@ -139,6 +138,7 @@ def process_chunk(pkg: int, trigger_mode, tot_min, index: int, chip_nr: int):
 
 
 def process_chunks(events: Sequence[Chunk], trigger_mode, tot_min):
+    # for ev in tqdm.tqdm(events, total=len(events)):
     for ev in events:
         for idx, datum in enumerate(ev.payload):
             yield process_chunk(int(datum), trigger_mode, tot_min, idx, ev.chip_nr)
