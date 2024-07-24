@@ -1,3 +1,5 @@
+# example data files
+large_data/
 # IDE/ emacs
 *~
 .idea/
