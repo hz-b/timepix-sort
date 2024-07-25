@@ -7,8 +7,8 @@ from timepix_sort.data_model import PixelEvent, TimeOfFlightEvent
 logger = logging.getLogger('timepix_sport')
 
 
-def sort_events(events: Sequence[Union[PixelEvent|TimeOfFlightEvent]]) -> Sequence[Union[PixelEvent|TimeOfFlightEvent]]:
-    def f_sort_val(event: Union[TimeOfFlightEvent | PixelEvent]):
+def sort_events(events: Sequence[Union[PixelEvent,TimeOfFlightEvent]]) -> Sequence[Union[PixelEvent,TimeOfFlightEvent]]:
+    def f_sort_val(event: Union[TimeOfFlightEvent,PixelEvent]):
         return event.time_of_arrival
 
     # numpy again faster?
@@ -16,9 +16,7 @@ def sort_events(events: Sequence[Union[PixelEvent|TimeOfFlightEvent]]) -> Sequen
     sort_vec = np.array([ev.time_of_arrival for cnt, ev in enumerate(events)])
     start = datetime.now()
     indices = np.argsort(sort_vec)
-    print(indices)
     end = datetime.now()
-    events = np.array(events, dtype=object)
     events = events[indices]
     end2 = datetime.now()
     dt = (end - start).total_seconds()
@@ -28,4 +26,3 @@ def sort_events(events: Sequence[Union[PixelEvent|TimeOfFlightEvent]]) -> Sequen
         f" rearranging required {dt3:.3f} seconds"
     )
     return events
-
