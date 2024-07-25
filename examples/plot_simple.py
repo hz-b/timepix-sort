@@ -12,8 +12,8 @@ from timepix_sort.sort import sort_events
 data_dir = Path(__file__).parent.parent / "tests" / "data"
 filename = data_dir / "Co_pos_0000.tpx3"
 
-data_dir = Path(__file__).parent.parent / "large_data"
-filename = data_dir / "Fe_pos_0001.tpx3"
+# data_dir = Path(__file__).parent.parent / "large_data"
+# filename = data_dir / "Fe_pos_0001.tpx3"
 
 start = datetime.now()
 chunks = list(read_chunks(filename))
