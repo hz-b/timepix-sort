@@ -17,7 +17,8 @@ class PixelPosition:
 
 @dataclass
 class TimeOfFlightEvent:
-    time_of_arrival: float
+    # typically stored in fs
+    time_of_arrival: np.datetime64
     chip_nr: int
     id_: int
     # always this position ?
@@ -27,7 +28,9 @@ class TimeOfFlightEvent:
 @dataclass
 class PixelEvent:
     chip_nr: int
-    time_of_arrival: float
-    time_over_threshold: float
+    # typically stored in fs
+    time_of_arrival: np.datetime64
+    # typically stored in fs
+    time_over_threshold: np.datetime64
     id_: int
     pos: PixelPosition

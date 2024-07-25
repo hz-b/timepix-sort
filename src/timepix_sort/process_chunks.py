@@ -1,9 +1,16 @@
 from typing import Sequence
-
 import numpy as np
 
 from timepix_sort.config import TDCEventType
 from timepix_sort.data_model import Chunk, TimeOfFlightEvent, PixelEvent, PixelPosition
+
+
+def t_in_seconds_to_fs(t: float) -> np.datetime64:
+    """ready to be converted to `numpy.datetime64`
+    """
+    #: seconds to femto seconds
+    s2fs = 1e12
+    return np.datetime64(round(t * s2fs), 'fs')
 
 
 def tdc_time_stamp(datum: int, index: int, chip_nr: int):
@@ -18,7 +25,7 @@ def tdc_time_stamp(datum: int, index: int, chip_nr: int):
         raise AssertionError("TDC timestamp unknown!")
     time_of_arrival = TDC_timestamp
     return TimeOfFlightEvent(
-        time_of_arrival=time_of_arrival, chip_nr=chip_nr, id_=index
+        time_of_arrival=t_in_seconds_to_fs(time_of_arrival), chip_nr=chip_nr, id_=index
     )
 
 
@@ -112,8 +119,8 @@ def pixel_event(pkg: int, TOT_min, index: int, chip_nr: int):
         # time_of_arrival = correct_time_of_arrival(xx, yy, TOA_s, TOT)
         return PixelEvent(
             chip_nr=chip_nr,
-            time_of_arrival=TOA,
-            time_over_threshold=TOT,
+            time_of_arrival=t_in_seconds_to_fs(TOA),
+            time_over_threshold=t_in_seconds_to_fs(TOT),
             id_=index,
             pos=PixelPosition(x=xx, y=yy),
         )

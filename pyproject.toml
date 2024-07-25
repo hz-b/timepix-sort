@@ -2,7 +2,8 @@
 requires = [
     "setuptools",
     "setuptools-scm",
-    "numpy",
+    # for time units
+    "numpy>=1.7.0",
     # "fsspec"
 ]
 build-backend = "setuptools.build_meta"
