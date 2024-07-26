@@ -9,5 +9,7 @@ namespace timepix::sort {
     timepix::data_model::ChunkCollection
     read_chunks(const mmap_allocator_namespace::mmappable_vector<uint64_t>& buffer);
 
+    std::tuple<uint8_t, int> process_header(const int64_t datum);
+
 }// namespace timepix::sort
 #endif // TIMEPIX_READ_H

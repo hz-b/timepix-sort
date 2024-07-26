@@ -1,3 +1,4 @@
+#include <timepix_sort/read.h>
 #include <timepix_sort/process.h>
 #include <timepix_sort/detail/process_chunks.h>
 #include <iostream>
@@ -17,7 +18,7 @@ enum TDC2TriggerMode{
 
 enum TDCEventType{
     timestamp = 0x6,
-    pixel = 0x8
+    pixel = 0xb
 };
 
 namespace tpxs = timepix::sort;
@@ -35,17 +36,28 @@ std::vector<uint64_t> tpxs::process(
     )
 {
 
-    uint64_t n_events=0, pixels=0, elfs=0, naughts=0, twos=0, fours=0, sevens=0,n_timestamps=0;
+    uint64_t n_events=0, n_pixels=0, n_timestamps=0;
     std::vector<uint64_t> timestamps;
 
     for(size_t i=0; i < collection.size(); ++i){
 	const auto& view = collection.get(i);
 	const auto& events = view.events();
 	// Todo: recheck that the header is found !
-	assert(events.size() == view.n_events());
+#if 0
+	{
+	    assert(events.size() == view.n_events());
+	    char chip_nr;
+	    int check;
+	    std::tie(chip_nr, check) = tpxs::process_header(view.header());
+	    assert(check == events.size());
+
+	}
+#endif
+
 	for(const uint64_t ev : events){
 	    int event_type = (ev >> 60) & 0xf;
 	    int trigger_mode = ev >> 56;
+
 	    switch(event_type){
 	    case timestamp:
 		n_timestamps++;
@@ -54,40 +66,18 @@ std::vector<uint64_t> tpxs::process(
 		}
 		break;
 	    case pixel:
-		pixels++;
+		n_pixels++;
 		timestamps.push_back(tpxd::unfold_pixel_event(ev));
 		break;
-	    case 2:
-		twos ++;
-		break;
-	    case 7:
-		sevens ++;
-		break;
-	    case 4:
-		fours ++;
-		break;
-	    case 0:
-		naughts++;
-		break;
-	    case 11:
-		elfs++;
-		break;
-	    default:
-		std::cerr << "unkwnon event type " << event_type << std::endl;
 	    }
 	    n_events++;
 	}
     }
     std::cout << "procssed " << collection.size() << " chunks"
 	      << " containing " << n_events << " events"
-	      << " containing "<< pixels << " pixels"
+	      << " containing "<< n_pixels << " pixels"
 	      << " timestamps " << n_timestamps
-	      << "; naughts " << naughts
-	      << " twos " << twos
-	      << " fours " << fours
-	      << " sevens " << sevens
-	      << " elfs " << elfs
-	      << " remaining " << int64_t(n_events) - int64_t(pixels + n_timestamps + naughts + elfs + twos)
+	      << " remaining " << int64_t(n_events) - int64_t(n_pixels + n_timestamps)
 	      << std::endl;
 
     return timestamps;
