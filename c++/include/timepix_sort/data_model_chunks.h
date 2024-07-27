@@ -4,12 +4,12 @@
 #include <stdint.h>
 #include <memory>
 #include <vector>
-#include "mmappable_vector.h"
-
 #include <cassert>
+#include <ranges>
 
 namespace timepix::data_model {
 
+    // Todo: review name chunk: event basket
     struct ChunkAddress{
 	uint64_t offset;
 	uint32_t n_events;
@@ -22,14 +22,15 @@ namespace timepix::data_model {
 	    {}
     };
 
-
+    /**
+     * Access to one chunk, but keeping reference to the chunk collection
+     */
     class ChunkView;
 
 
     class ChunkCollection{
     private:
-	const mmap_allocator_namespace::mmappable_vector<uint64_t>& m_buffer;
-	// std::shared_ptr<const std::vector<uint64_t>> m_buffer;
+	std::shared_ptr<const std::vector<uint64_t>> m_buffer;
 	const std::vector<ChunkAddress> m_chunk_addresses;
 
 	inline auto buffer() const { return this->m_buffer; }
@@ -37,8 +38,7 @@ namespace timepix::data_model {
 
     public:
     ChunkCollection(
-	const mmap_allocator_namespace::mmappable_vector<uint64_t>& buffer,
-	// std::shared_ptr<const std::vector<uint64_t>> buffer,
+	std::shared_ptr<const std::vector<uint64_t>> buffer,
 	const std::vector<ChunkAddress> chunk_addresses
 	)
 	    : m_buffer(buffer)
@@ -46,21 +46,17 @@ namespace timepix::data_model {
 	{}
 	inline ChunkView get(size_t index) const ;
 	inline size_t size() const { return this->m_chunk_addresses.size(); }
-	/*
-	*/
     };
 
 
     class ChunkView{
     private:
-	const mmap_allocator_namespace::mmappable_vector<uint64_t>& m_buffer;
-	//std::shared_ptr<const std::vector<uint64_t>> m_buffer;
+	std::shared_ptr<const std::vector<uint64_t>> m_buffer;
 	const ChunkAddress m_address;
 
     public:
     ChunkView(
-	const mmap_allocator_namespace::mmappable_vector<uint64_t>& buffer,
-	//const std::shared_ptr<const std::vector<uint64_t>> buffer,
+	const std::shared_ptr<const std::vector<uint64_t>> buffer,
 	const ChunkAddress address)
 	: m_buffer(buffer)
 	, m_address(address)
@@ -70,20 +66,12 @@ namespace timepix::data_model {
 	inline uint32_t n_events() const { return this->m_address.n_events; }
 	inline auto chip_nr()      const { return this->m_address.chip_nr;  }
 
-	inline auto header()       const { return this->m_buffer.at(this->offset()); }
+	inline auto header()       const { return this->m_buffer->at(this->offset()); }
 
 	inline auto events()       const {
 	    const auto start = this->offset() + 1;
 	    const auto end   = start + this->n_events();
-	    // return std::vector<int64_t>(this->m_buffer->begin() + start, this->m_buffer->begin() + end);
-	    std::vector<uint64_t> r(this->n_events());
-	    for(size_t i=0;  i<this->n_events(); ++i){
-		const auto elm_num = start + i;
-		assert(elm_num >= 0 && elm_num < end);
-		r[i] = this->m_buffer[elm_num];
-	    }
-	    return r;
-	    // return std::vector<uint64_t>(this->m_buffer.begin() + start * sizeof(uint64_t), this->m_buffer.begin() + end  * sizeof(uint64_t));
+	    return std::vector<int64_t>(this->m_buffer->begin() + start, this->m_buffer->begin() + end);
 	}
     };
 

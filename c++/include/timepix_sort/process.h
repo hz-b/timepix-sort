@@ -2,11 +2,14 @@
 #define TIMEPIX_PROCESS_H
 
 #include <timepix_sort/data_model_chunks.h>
-#include "mmappable_vector.h"
+#include <timepix_sort/data_model.h>
 
 namespace timepix::sort {
-    std::vector<uint64_t>  process(const timepix::data_model::ChunkCollection&,
-				   int trigger_mode, int tot_min
+    std::vector<timepix::data_model::Event> process(
+	const timepix::data_model::ChunkCollection& collection,
+	int select_trigger_mode,
+	int tot_min
 	);
+
 }// namespace timepix::sort
 #endif // TIMEPIX_PROCESS_H

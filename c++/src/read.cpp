@@ -39,31 +39,29 @@ std::tuple<uint8_t, int> tpxs::process_header(const int64_t datum)
 
 
 tpxd::ChunkCollection
-tpxs::read_chunks(const mmap_allocator_namespace::mmappable_vector<uint64_t>& buffer)
+tpxs::read_chunks(std::shared_ptr<const std::vector<uint64_t>> buffer)
 {
 
-    uint64_t i=0, total_events=0, n_elm =  buffer.size() / sizeof(uint64_t);
-
-    assert(buffer.size() %  sizeof(uint64_t) == 0);
+    uint64_t i=0, total_events=0, n_elm =  buffer->size();
 
     std::vector<tpxd::ChunkAddress> chunk_addresses;
     for(uint64_t cnt = 0; cnt  < n_elm; ){
 	int32_t n_events, n_events_check;
 	uint8_t chip_nr, chip_nr_check;
 	try{
-	    std::tie(chip_nr, n_events) = tpxs::process_header(buffer.at(cnt));
+	    std::tie(chip_nr, n_events) = tpxs::process_header(buffer->at(cnt));
 	}
 	catch(const std::runtime_error &e) {
 		std::cerr << "error occured after reading " << i << " chunks " << std::endl;
 		std::cerr << " cnt now at "  << cnt << std::endl;
-		std::cerr << " buffer size " << buffer.size() << std::endl;
+		std::cerr << " buffer size " << buffer->size() << std::endl;
 		throw e;
 	}
 	const auto chunk_address = tpxd::ChunkAddress(cnt, chip_nr, n_events);
 
 	// readback and check if it matches expected data
 #if 0
-	std::tie(chip_nr_check, n_events_check) = tpxs::process_header(buffer[cnt]);
+	std::tie(chip_nr_check, n_events_check) = tpxs::process_header(buffer->operator[cnt]);
 	assert(chip_nr == chip_nr_check);
 	assert(n_events == n_events_check);
 #endif

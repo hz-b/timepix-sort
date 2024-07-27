@@ -1,5 +1,8 @@
 #ifndef TIMEPIX_DETAIL_PROCESS_CHUNKS_H
 #define TIMEPIX_DETAIL_PROCESS_CHUNKS_H
+
+#include <timepix_sort/data_model.h>
+
 namespace timepix::sort::detail {
 
     /* time stamp in fs */
@@ -18,8 +21,8 @@ namespace timepix::sort::detail {
 	} else {
 	    throw std::runtime_error("TDC timestamp unknown!");
 	}
-
-	return int64_t(time_of_arrival * s2fs);
+	using timepix::data_model::TimeOfFlightEvent;
+	return TimeOfFlightEvent(int64_t(time_of_arrival * s2fs));
     }
 
     static auto inline unfold_pixel_event(const uint64_t pkg){
@@ -68,7 +71,12 @@ namespace timepix::sort::detail {
 	}
 
 #endif
-	return TOA_s;
+	return timepix::data_model::PixelEvent(
+	    timepix::data_model::PixelPos(xx,yy),
+	    TOA_s,
+	    TOT
+	    );
+
 //    if TOT > TOT_check and centerpixel != 0:
 //        # Remove events with lower TOT to improve time resolution
 //        # ignore  the switch for start
