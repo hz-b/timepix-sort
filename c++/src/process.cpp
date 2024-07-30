@@ -1,6 +1,7 @@
 #include <timepix_sort/read.h>
 #include <timepix_sort/process.h>
 #include <timepix_sort/detail/process_chunks.h>
+#include <timepix_sort/data_model.h>
 #include <iostream>
 #include <cassert>
 
@@ -23,6 +24,7 @@ enum TDCEventType{
 
 namespace tpxs = timepix::sort;
 namespace tpxd = timepix::sort::detail;
+namespace dm = timepix::data_model;
 
 
 std::vector<timepix::data_model::Event>
@@ -69,12 +71,12 @@ tpxs::process(
 	    case timestamp:
 		n_timestamps++;
 		if (select_trigger_mode == trigger_mode){
-		    events.push_back(tpxd::tdc_time_stamp(ev));
+		    events.push_back(std::move(tpxd::tdc_time_stamp(ev)));
 		}
 		break;
 	    case pixel:
 		n_pixels++;
-		events.push_back(tpxd::unfold_pixel_event(ev));
+		events.push_back(std::move(tpxd::unfold_pixel_event(ev)));
 		break;
 	    }
 	    n_events++;

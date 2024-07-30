@@ -49,7 +49,8 @@ namespace timepix::data_model {
 
     class PixelEvent : public HasTimeOfArrival<PixelEvent>{
     private:
-	const int64_t m_time_of_arrival, m_time_over_threshold;
+	const int64_t m_time_of_arrival;
+	const int64_t m_time_over_threshold;
 	const PixelPos m_pos;
 
     public:
@@ -69,14 +70,6 @@ namespace timepix::data_model {
 
     };
 
-    typedef std::variant<TimeOfFlightEvent,PixelEvent> Event;
-
-    class EventCollection
-    {
-	const std::vector<Event> events;
-
-    };
-
     namespace {
 	// helper type for the visitor #4
 	template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -84,36 +77,41 @@ namespace timepix::data_model {
 	template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
     }
 
-    class EventProxyForTimeOfArrivalSort
+    typedef struct std::variant<TimeOfFlightEvent,PixelEvent> a_event;
+    class Event
     {
-	Event const m_event;
-
+	a_event m_event;
     public:
-	EventProxyForTimeOfArrivalSort& operator=(const Event&o);
-
-	constexpr EventProxyForTimeOfArrivalSort(const EventProxyForTimeOfArrivalSort& o) = default;
-	constexpr EventProxyForTimeOfArrivalSort& operator=(const EventProxyForTimeOfArrivalSort&o) = default;
-
-	/*
-	EventProxyForTimeOfArrivalSort& operator=(EventProxyForTimeOfArrivalSort&& o);
-	EventProxyForTimeOfArrivalSort(EventProxyForTimeOfArrivalSort&& o);
-	*/
-	inline EventProxyForTimeOfArrivalSort(Event const event)
-	    : m_event(event)
+	inline Event(a_event&& event)
+	    : m_event(std::move(event))
 	    {}
 
-	const inline bool operator< (EventProxyForTimeOfArrivalSort const& o) const {
-	    bool flag;
+	inline Event(TimeOfFlightEvent&& event)
+	    : m_event(std::move(event))
+	    {}
+
+	inline Event(PixelEvent&& event)
+	    : m_event(std::move(event))
+	    {}
+
+
+	inline uint64_t time_of_arrival () const {
+	    uint64_t t;
 	    std::visit(overloaded{
-		    [&flag] (const PixelEvent& t, const PixelEvent& o){
-			flag = (t.time_of_arrival() < o.time_of_arrival());
+		    [&t] (const PixelEvent& ev){
+			t = ev.time_of_arrival();
 		    },
-		    [&flag] (const auto& t, const auto& o){
-			flag = (t.time_of_arrival() < o.time_of_arrival());
+		    [&t] (const auto& ev){
+			t = ev.time_of_arrival();
 		    },
-		}, this->m_event, o.m_event);
-	    return flag;
+		}, this->m_event);
+	    return t;
 	}
+    };
+
+    class EventCollection
+    {
+	const std::vector<Event> events;
 
     };
 

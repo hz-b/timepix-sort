@@ -21,6 +21,8 @@ main : $(OBJS)
 read_raw.o : read_raw.cpp
 	$(CXX) $(CXXFLAGS_MAP_ALLOC) -c -o $@ $^
 
+sort_test : sort_test.o
+	$(LD) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 clean :
 	$(RM) $(RMFLAGS) $(OBJS)
