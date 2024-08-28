@@ -1,17 +1,18 @@
 import io
+from typing import Sequence
+
 import numpy as np
 from timepix_sort.data_model import Chunk
 
 
-def read_chunks(fp):
-    def per_event():
-        for datum in read(fp):
-            yield datum
-    yield from chunks(per_event())
+def read_chunks(stream: Sequence[bytes]):
+    yield from chunks(np.frombuffer(stream, dtype="<u8"))
 
 
-def read(fp):
-    return np.fromfile(fp, dtype="<u8")
+def read(filename):
+    with open(filename, 'rb') as fp:
+        return np.frombuffer(fp.read(4), dtype="<u8")
+    # return np.fromfile(fp, dtype="<u8")
 
 
 def process_header(datum: int):
@@ -29,10 +30,13 @@ def process_header(datum: int):
 
 
 def chunks(stream):
-    for elem in stream:
-        header = int(elem)
-        chip_nr, n_entries = process_header(header)
-        if n_entries > 1500:
-            raise AssertionError(f"Did not expect {n_entries}")
-        event = [next(stream) for i in range(n_entries)]
-        yield Chunk(chip_nr=chip_nr, payload=event)
+    start = 0
+    while start < len(stream):
+         header = int(stream[start])
+         chip_nr, n_entries = process_header(header)
+         if n_entries > 1500:
+             raise AssertionError(f"Did not expect {n_entries}")
+         end = start + n_entries + 1
+         event = stream[start + 1: end]
+         yield Chunk(chip_nr=chip_nr, payload=event)
+         start = end
