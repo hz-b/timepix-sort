@@ -1,9 +1,13 @@
+import io
 import numpy as np
 from timepix_sort.data_model import Chunk
 
 
 def read_chunks(fp):
-    yield from chunks(read(fp))
+    def per_event():
+        for datum in read(fp):
+            yield datum
+    yield from chunks(per_event())
 
 
 def read(fp):
@@ -25,13 +29,10 @@ def process_header(datum: int):
 
 
 def chunks(stream):
-    start = 0
-    while start < len(stream):
-        header = int(stream[start])
+    for elem in stream:
+        header = int(elem)
         chip_nr, n_entries = process_header(header)
         if n_entries > 1500:
             raise AssertionError(f"Did not expect {n_entries}")
-        end = start + n_entries + 1
-        event = stream[start + 1: end]
+        event = [next(stream) for i in range(n_entries)]
         yield Chunk(chip_nr=chip_nr, payload=event)
-        start = end
