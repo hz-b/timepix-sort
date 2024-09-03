@@ -141,7 +141,7 @@ void tpp::event_init(py::module &m)
 		 // todo: make it optional if pixel events should be sorted
 		 py::buffer_info buf = indices_a.request();
 		 uint64_t * p = static_cast<uint64_t *>(buf.ptr);
-		 const size_t n_elms = idxa.size();
+		 const size_t n_elms = indices_a.size();
 		 const std::vector<size_t> indices(p, p + n_elms);
 		 return PixelEventsDiffTime(std::move(tps::calculate_diff_time(col, indices)));
 		 //return PixelEventsDiffTime(std::move());
