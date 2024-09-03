@@ -3,6 +3,7 @@ requires = [
     "setuptools",
     "setuptools-scm",
     "numpy",
+    "pybind11"
     # "fsspec"
 ]
 build-backend = "setuptools.build_meta"
