@@ -27,8 +27,13 @@ void tpp::read_init(py::module &m)
     // m.def("read_chunks", &tps::read_chunks);
 
     m.def("process",
-	  [](const tpd::ChunkCollection& collection, const int select_trigger_mode, const int tot_min) {
-	      return tpd::EventCollection(std::move(tps::process(collection, select_trigger_mode, tot_min)));
-	  });
+	  [](const tpd::ChunkCollection& collection, const int select_trigger_mode, const uint64_t time_over_threshold) {
+	      auto tmp = tps::process(collection, select_trigger_mode, time_over_threshold);
+	      auto ev = tpd::EventCollection(std::move(std::get<0>(tmp)));
+	      return std::make_pair(ev, std::get<1>(tmp));
+	  },
+	  "extract events from the chunks",
+	  py::arg("collection"), py::arg("selected_trigger_mode"), py::arg("time_over_threshold")
+	);
 
 }

@@ -11,12 +11,13 @@ library_dirs=[ str(t_dir / "lib") ]
 ext_modules = [
     Pybind11Extension(
         "_timepix_sort",
-        ([
-            "src/c++/io.cpp",
+        [
             "src/c++/chunks.cpp",
+            "src/c++/io.cpp",
             "src/c++/events.cpp",
             "src/c++/module.cpp",
-        ]),
+            "src/c++/volume.cpp",
+        ],
         include_dirs=include_dirs + ["/usr/local/include"],
         libraries=["timepix-sort-c++",],
         library_dirs=library_dirs + ["/usr/local/lib"],

@@ -11,4 +11,5 @@ PYBIND11_MODULE(_timepix_sort, m) {
     tpp::event_init(m);
     tpp::chunks_init(m);
     tpp::read_init(m);
+    tpp::volume_init(m);
 }
