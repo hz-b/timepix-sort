@@ -17,7 +17,7 @@ jobs:
         numpy-version: [ "numpy<2.0" , "numpy>=2.0" ]
 
     steps:
-      - name: install required extra packages
+      - name: install packages required for library
         # currently this action seems to make trouble for me
         # does not find boost.config when run from the cache
         # uses: awalsh128/cache-apt-pkgs-action@latest
@@ -51,6 +51,7 @@ jobs:
           cmake timepix-sort-cpp -B build_cpp -DBUILD_TESTS=off
           make -C build_cpp
           sudo cmake --install build_cpp
+          sudo ldconfig
 
       - name: Install package
         run: |
@@ -69,5 +70,6 @@ jobs:
       - name: Test with pytest
         run: |
           # Do I need to add this ?
-          export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+          # is running ldconfig making it possible
+          # export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
           pytest
