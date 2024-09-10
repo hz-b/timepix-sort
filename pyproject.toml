@@ -10,7 +10,7 @@
 
 [build-system]
 build-backend = 'mesonpy'
-requires = ['meson-python', 'cython']
+requires = ['meson-python', 'cython', 'pybind11']
 
 
 
