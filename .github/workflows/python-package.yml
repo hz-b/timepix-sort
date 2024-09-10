@@ -49,6 +49,7 @@ jobs:
         run: |
           mkdir build_cpp
           cmake timepix-sort-cpp -B build_cpp -DBUILD_TESTS=off
+          make -C build_cpp
           sudo cmake --install build_cpp
 
       - name: Install package
