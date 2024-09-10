@@ -19,13 +19,14 @@ _now = datetime.datetime.now
 
 tic = _now()
 data = np.fromfile("tests/data/Co_pos_0000.tpx3", dtype="<u8")
-d1 = np.fromfile("large_data/Fe_pos_0000.tpx3", dtype="<u8")
+# d1 = np.fromfile("large_data/Fe_pos_0000.tpx3", dtype="<u8")
 # d2 = np.fromfile("large_data/Fe_pos_0001.tpx3", dtype="<u8")
 # d3 = np.fromfile("large_data/Fe_pos_0002.tpx3", dtype="<u8")
-# d4 = np.fromfile("large_data/Fe_pos_0003.tpx3", dtype="<u8")
+d4 = np.fromfile("large_data/Fe_pos_0003.tpx3", dtype="<u8")
 # data = np.fromfile("tests/data/Co_test_0000.tpx3", dtype="<u8")
 # data = np.concatenate([d1, d2, d3, d4])
-data = d1
+data = d4
+# del d1, d2, d3, d4
 print(data.shape)
 toc_ff = _now()
 chunks = _ts.read_chunks(data)
@@ -72,14 +73,15 @@ toc_pixels_sorted = _now()
 #         break
 #
 #
-tmp = np.arange(0, 2000)
+tmp = np.arange(0, 20)
 lut = np.array([tmp, tmp]).T
-lut[:, 0] *= int(2e9 / 2000)
-# volume = np.zeros([525, 524, len(tmp)], dtype=np.uint16)
-# _ts.data_to_volume(pixels_diff, lut, volume)
+lut[:, 0] *= int(1.6e6 / 20)
+volume = np.zeros([525, 524, len(tmp)], dtype=np.uint16)
+_ts.data_to_volume(pixels_diff, lut, volume)
 # print("volume sum", np.sum(np.sum(volume)))
 
 pointsr = _ts.data_to_points(pixels_diff)
+# = _ts.data_to_volume(pixels_diff)
 tas = pixels_diff.time_of_arrival()
 toc_volume = _now()
 #
@@ -97,28 +99,53 @@ producing volume     : { toc_volume        - toc_pixels_sorted  }
 
 total                : { toc_volume        - tic                }
 """
-print("creating plots")
-fig, axes = plt.subplots(2, 1)
-fs = 1e-15
-ax_overview, ax_diff = axes
-# ax_overview.hist(events.time_of_arrival() * fs, bins=10 * 1000)
-ax_diff.hist(pixels_diff.time_of_arrival() * fs * 1e9, bins=1000)
-ax_diff.set_label("time of arrival [ns]")
 print(txt)
-plt.ioff()
-plt.show()
+print("creating plots")
+if True:
+    fig, ax_diff = plt.subplots(1, 1)
+    fs = 1e-15
+    # ax_overview, ax_diff = axes
+    # ax_overview.hist(events.time_of_arrival() * fs, bins=10 * 1000)
+    bins = np.arange(1600)
+    ax_diff.hist(pixels_diff.time_of_arrival() * fs * 1e9, bins=bins)
+    ax_diff.set_label("time of arrival [ns]")
+    plt.ioff()
+    plt.show()
 
 if True:
+    fig, ax = plt.subplots(1, 1)
+    tmp = np.sum(volume, axis=-1)
+    ref = np.max(tmp.ravel())
+    print("ref")
+    ax.imshow(tmp, cmap="grey", vmin=0, vmax=ref/3.0)
+    # print(tmp.)
+    plt.show()
+
+if False:
     # print(len(set(tas)))
+
     points = pointsr.astype(np.float32)
     points = (points * np.array([1, 1, 1e-6])[np.newaxis, :]).astype(np.float32)
-    # points = points[::10, :]
+    points = points[:, :]
     print(points.min(axis=0), points.max(axis=0))
     print(pointsr[-2].min(axis=0), pointsr[-2].max(axis=0))
-    pv.plot(
-        points,
-        scalars=pixels_diff.time_over_threshold(),
-        render_points_as_spheres=True,
-        point_size=1,
-        show_scalar_bar=True,
+    pl = pv.Plotter(lighting="three lights")
+    # pl.add_points(
+    #     points,
+    #     scalars=pixels_diff.time_over_threshold(),
+    #     render_points_as_spheres=True,
+    #     point_size=1,
+    #     emissive=True,
+    #     show_scalar_bar=True,
+    # )
+    pl.add_volume(volume)
+    pl.show_bounds(
+        xtitle="pix x",
+        ytitle="pix y",
+        ztitle="time of arrival [ns]",
+        show_zlabels=True,
+        color="k",
+        font_size=26,
     )
+    pl.add_text("Co pos 0000")
+    pl.show()

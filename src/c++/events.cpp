@@ -116,6 +116,12 @@ void tpp::event_init(py::module &m)
 	    ev.show(strm);
 	    return strm.str();
 	})
+	.def_property_readonly( "n_events"                   , &tpd::EventStatistics::n_events                  )
+	.def_property_readonly( "n_pixels"                   , &tpd::EventStatistics::n_pixels                  )
+	.def_property_readonly( "n_timestamps"               , &tpd::EventStatistics::n_timestamps              )
+	.def_property_readonly( "n_timestamps_with_trigger"  , &tpd::EventStatistics::n_timestamps_with_trigger )
+	.def_property_readonly( "n_control_indications"      , &tpd::EventStatistics::n_control_indications     )
+	.def_property_readonly( "n_global_time"              , &tpd::EventStatistics::n_global_time             )
 	;
 
     py::class_<tpd::Event> event(m, "Event");
@@ -207,7 +213,7 @@ void tpp::event_init(py::module &m)
 	    )
 
 	/**
-	 * @earning don't make the indices array a std:vector.
+	 * @warning don't make the indices array a std:vector.
 	 *          pybind seems to convert it into a list
 	 */
 	.def("pixel_events_with_difference_time",
