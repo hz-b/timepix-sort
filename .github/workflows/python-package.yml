@@ -11,40 +11,65 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         python-version: [ "3.9" , "3.10", "3.11", "3.12" ]
         numpy-version: [ "numpy<2.0" , "numpy>=2.0" ]
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }} ${{ matrix.numpy-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        numpy-version: ${{ matrix.numpy-version }}
-        cache: 'pip'
-        cache-dependency-path: |
+      - name: install packages required for library
+        # currently this action seems to make trouble for me
+        # does not find boost.config when run from the cache
+        # uses: awalsh128/cache-apt-pkgs-action@latest
+        # with:
+        #    packages: libboost-test-dev libboost-program-options-dev libboost-dev patch
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libboost-test-dev libboost-program-options-dev libboost-dev patch cmake
+
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }} ${{ matrix.numpy-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          numpy-version: ${{ matrix.numpy-version }}
+          cache: 'pip'
+          cache-dependency-path: |
            **/pyproject.toml
            **/requirements*.txt
 
-    - name: Install package
-      run: |
-        python -m pip install --upgrade pip wheel
-        python -m pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install '${{ matrix.numpy-version }}' ./
+      - name: checkout cpp library
+        uses: actions/checkout@v4
+        with:
+          repository: hz-b/timepix-sort-cpp
+          path: timepix-sort-cpp
+          ref: main
 
-    - name: Install package
-      run: |
-        python -m pip install flake8 pytest
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: build and install cpp package
+        run: |
+          mkdir build_cpp
+          cmake timepix-sort-cpp -B build_cpp -DBUILD_TESTS=off
+          make -C build_cpp
+          sudo cmake --install build_cpp
+          sudo ldconfig
 
-    - name: Test with pytest
-      run: |
-        pytest
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip wheel
+          python -m pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install '${{ matrix.numpy-version }}' ./
+
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Test with pytest
+        run: |
+          # Do I need to add this ?
+          # is running ldconfig making it possible
+          # export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+          pytest

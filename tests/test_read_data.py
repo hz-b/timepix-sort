@@ -1,40 +1,24 @@
 from pathlib import Path
-
-import timepix_sort
 import numpy as np
 
-from timepix_sort.config import TDC2TriggerMode
-from timepix_sort.data_model import PixelEvent
-from timepix_sort.read import read, chunks, read_chunks
-from timepix_sort.process_chunks import process_chunks
+from timepix_sort.config import TDC1TriggerMode
+from timepix_sort.process import process_chunks
+from timepix_sort.post_process import data_to_points
+from timepix_sort.read import read_file_to_buffer, read_chunks
 
 
-def test_package_content():
-
-    dir(timepix_sort)
-
-def test_data_read():
+def test_read():
     data_dir = Path(__file__).parent / "data"
     filename = data_dir / "Co_pos_0000.tpx3"
-    # filename = data_dir / "Co_test_0000.tpx3"
+    buffer = read_file_to_buffer(filename)
+    chunks = read_chunks(buffer)
+    events, events_statistics = process_chunks(chunks, TDC1TriggerMode.rising_edge, 0)
 
-    buffer = np.fromfile(filename, '<u1')
-    t_chunks = [ch for ch in read_chunks(buffer)]
-    assert len(t_chunks) == 178693
-    events = [
-        ev for ev in process_chunks(t_chunks, trigger_mode=TDC2TriggerMode.rising_edge, tot_min=1)
-        if ev is not None
-    ]
+    si_buf = events.sorted_indices()
+    sorted_indices = np.array(si_buf, copy=False)
 
-    assert len(events) > len(t_chunks)
-    result = np.zeros([1024, 1024])
-    for ev in events:
-        if isinstance(ev, PixelEvent):
-            x, y = ev.pos.x, ev.pos.y
-            assert x >= 0
-            assert y >= 0
-            x = int(round(x))
-            y = int(round(y))
-            result[x, y] += 1
-    np.save("image_data.npy", result)
-    return
+    pixels_diff = events.pixel_events_with_difference_time(si_buf)
+    pixels_diff.sort()
+    assert pixels_diff.is_sorted
+
+    points = data_to_points(pixels_diff)
