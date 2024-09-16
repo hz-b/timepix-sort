@@ -2,7 +2,8 @@ python_sources = [
     '__init__.py',
     'config.py',
     'data_model.py',
-    'process_chunks.py',
+    'process.py',
+    'post_process.py',
     'read.py',
     ]
 
