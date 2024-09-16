@@ -16,7 +16,7 @@ requires = ['meson-python', 'cython', 'pybind11']
 
 [project]
 name = "timepix_sort"
-version = "0.1.0"
+version = "0.2.0"
 description = "Sort pixels events"
 authors = [
     {name="Pierre Schnizer", email="pierre.schnizer@helmholtz-berlin.de"},
