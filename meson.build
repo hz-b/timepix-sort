@@ -9,7 +9,6 @@ project(
 # timepix_sort_cpp_dep = dependency('timepix_sort_cpp', method : 'cmake', required: false)
 incdir = include_directories(
     '/usr/local/include/',
-    '/home/mfp/.local/include/'
     )
 
 py = import('python').find_installation(pure: false)
@@ -20,7 +19,6 @@ pybind11_dep = dependency('pybind11')
 # add_project_compile_arguments('-ggdb', language : 'cpp')
 
 add_project_link_arguments('-L/usr/local/lib/', language : 'cpp')
-add_project_link_arguments('-L/home/mfp/.local/lib/', language : 'cpp')
 add_project_link_arguments('-ltimepix-sort-c++', language : 'cpp')
 py.extension_module(
     '_timepix_sort',
