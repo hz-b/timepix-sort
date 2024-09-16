@@ -1,8 +1,5 @@
 """Datamodel as provided by the extension
 """
-from . import _timepix_sort as _ts
-print(dir(_ts))
-
 # The data chunks: the entity that the detector provides
 from ._timepix_sort import ChunkView, ChunkCollection
 
