@@ -1,33 +1,21 @@
-from dataclasses import dataclass
-from typing import Sequence
-import numpy as np
+"""Datamodel as provided by the extension
+"""
+from . import _timepix_sort as _ts
+print(dir(_ts))
 
+# The data chunks: the entity that the detector provides
+from ._timepix_sort import ChunkView, ChunkCollection
 
-@dataclass
-class Chunk:
-    chip_nr: int
-    payload: Sequence[np.uint64]
+# pixel positions are wrapped by pixelpos. These are used by
+# pixel events
+from ._timepix_sort import PixelPos
 
-
-@dataclass
-class PixelPosition:
-    x: float
-    y: float
-
-
-@dataclass
-class TimeOfFlightEvent:
-    time_of_arrival: float
-    chip_nr: int
-    id_: int
-    # always this position ?
-    pos: PixelPosition(-2, -2)
-
-
-@dataclass
-class PixelEvent:
-    chip_nr: int
-    time_of_arrival: float
-    time_over_threshold: float
-    id_: int
-    pos: PixelPosition
+# The different types of events as currently covered by the
+# extension
+from ._timepix_sort import PixelEvent,  TimeOfFlightEvent
+# As the extension is implemented in c++ all the different events
+# are packed into
+from ._timepix_sort import Event
+# All events are then wrapped into a
+from ._timepix_sort import EventCollection
+from ._timepix_sort import EventStatistic

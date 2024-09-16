@@ -2,85 +2,81 @@
 """
 import datetime
 import numpy as np
-from timepix_sort import _timepix_sort as _ts
-
+import timepix_sort as ts
+print(ts)
+# from timepix_sort import _timepix_sort as _ts
+from timepix_sort.read import read_file_to_buffer, read_chunks
+from timepix_sort.process import process_chunks
+from timepix_sort.post_process import data_to_points, data_to_volume
+from timepix_sort.config import TDC1TriggerMode
 import pyvista as pv
 import matplotlib
-import pandas as pd
 
 matplotlib.use("qt5agg")
-# matplotlib.use("gtk4agg")
-import matplotlib.pyplot as plt
 
-print(_ts)
+import matplotlib.pyplot as plt
 
 
 _now = datetime.datetime.now
 
 tic = _now()
-data = np.fromfile("tests/data/Co_pos_0000.tpx3", dtype="<u8")
-# d1 = np.fromfile("large_data/Fe_pos_0000.tpx3", dtype="<u8")
-# d2 = np.fromfile("large_data/Fe_pos_0001.tpx3", dtype="<u8")
-# d3 = np.fromfile("large_data/Fe_pos_0002.tpx3", dtype="<u8")
-d4 = np.fromfile("large_data/Fe_pos_0003.tpx3", dtype="<u8")
-# data = np.fromfile("tests/data/Co_test_0000.tpx3", dtype="<u8")
+data = read_file_to_buffer("tests/data/Co_pos_0000.tpx3")
+d1 = read_file_to_buffer("large_data/Fe_pos_0000.tpx3")
+d2 = read_file_to_buffer("large_data/Fe_pos_0001.tpx3")
+d3 = read_file_to_buffer("large_data/Fe_pos_0002.tpx3")
+d4 = read_file_to_buffer("large_data/Fe_pos_0003.tpx3")
 # data = np.concatenate([d1, d2, d3, d4])
 data = d4
 # del d1, d2, d3, d4
 print(data.shape)
 toc_ff = _now()
-chunks = _ts.read_chunks(data)
+chunks = read_chunks(data)
 toc_chunks = _now()
 last_offset = 0
 
-rising_edge = 0x6E
-# correct ?
-falling_edge = 0x6F
-events, events_statistics = _ts.process(chunks, falling_edge, 10)
+events, events_statistics = process_chunks(chunks, TDC1TriggerMode.rising_edge, 10)
 toc_processed = _now()
+print(events_statistics)
+diff = events_statistics.n_events - (
+    events_statistics.n_timestamps +
+    events_statistics.n_pixels +
+    events_statistics.n_global_time +
+    events_statistics.n_control_indications
+)
+txt = f"""Event statistics
+# of events  {events_statistics.n_events: 8d} 
 
+consisting of 
+pixel        {events_statistics.n_pixels: 8d}
+timestamps   {events_statistics.n_timestamps: 8d}
+global time  {events_statistics.n_global_time: 8d}
+control      {events_statistics.n_control_indications: 8d}
+
+# difference
+             {diff: 8d}
+"""
+print(txt)
 si_buf = events.sorted_indices()
 sorted_indices = np.array(si_buf, copy=False)
-
-if False:
-    cnt = 0
-    for idx in sorted_indices:
-        event = events[idx]
-        if event.time_of_arrival == 0:
-            continue
-        cnt += 1
-        print(cnt, event)
-        if cnt > 10:
-            break
 
 print("sorted indices", sorted_indices[:10], type(sorted_indices), sorted_indices.dtype)
 toc_sorted = _now()
 pixels_diff = events.pixel_events_with_difference_time(si_buf)
+print("len of pixel diff", len(pixels_diff))
 toc_pixels = _now()
 if not pixels_diff.is_sorted:
     # sorting pixels diff
     pixels_diff.sort()
 toc_pixels_sorted = _now()
 
-# print("pixel_diff")
-# cnt = 0
-# for event in pixels_diff:
-#     if event.time_of_arrival in [0, 4, 2500, 2504]:
-#         continue
-#     cnt += 1
-#     print(cnt, event)
-#     if cnt > 20:
-#         break
-#
-#
 tmp = np.arange(0, 20)
 lut = np.array([tmp, tmp]).T
 lut[:, 0] *= int(1.6e6 / 20)
 volume = np.zeros([525, 524, len(tmp)], dtype=np.uint16)
-_ts.data_to_volume(pixels_diff, lut, volume)
+data_to_volume(pixels_diff, lut, volume)
 # print("volume sum", np.sum(np.sum(volume)))
 
-pointsr = _ts.data_to_points(pixels_diff)
+pointsr = data_to_points(pixels_diff)
 # = _ts.data_to_volume(pixels_diff)
 tas = pixels_diff.time_of_arrival()
 toc_volume = _now()
