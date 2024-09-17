@@ -44,9 +44,9 @@ diff = events_statistics.n_events - (
     events_statistics.n_control_indications
 )
 txt = f"""Event statistics
-# of events  {events_statistics.n_events: 8d} 
+# of events  {events_statistics.n_events: 8d}
 
-consisting of 
+consisting of
 pixel        {events_statistics.n_pixels: 8d}
 timestamps   {events_statistics.n_timestamps: 8d}
 global time  {events_statistics.n_global_time: 8d}
@@ -70,9 +70,9 @@ if not pixels_diff.is_sorted:
 toc_pixels_sorted = _now()
 
 tmp = np.arange(0, 20)
-lut = np.array([tmp, tmp]).T
+lut = np.array([tmp, tmp], dtype=np.uint64).T
 lut[:, 0] *= int(1.6e6 / 20)
-volume = np.zeros([525, 524, len(tmp)], dtype=np.uint16)
+volume = np.zeros([525, 524, len(tmp)], dtype=np.int32)
 data_to_volume(pixels_diff, lut, volume)
 # print("volume sum", np.sum(np.sum(volume)))
 
